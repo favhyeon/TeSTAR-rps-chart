@@ -155,11 +155,11 @@ const MOBILE_BREAKPOINT = 768;
 
 /* 탭마다 캡처(저장) 기준 폭이 다르다.
    - 텟페스 취향표: 기존과 동일한 1100px
-   - 공수 취향표: 가로가 더 길고 세로는 더 짧게 나오도록 1500px로 넓힘
+   - 공수 취향표: 위에서 아래로 나열하는 구성이라 1000px로 좁힘
    CSS의 #captureArea / #captureAreaLr width 값과 항상 같아야 한다. */
 const CAPTURE_WIDTH = {
     rps: 1100,
-    lr: 1500
+    lr: 1000
 };
 
 function getCaptureWidth(tab) {
