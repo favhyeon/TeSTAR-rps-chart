@@ -60,13 +60,12 @@ body {
     padding-top: 18px;
 }
 
-/* 공수 취향표: 위에서 아래로 한 줄씩 나열하는 구성이라
-   가로로 너무 넓지 않게 폭을 좁혀준다.
+/* 공수 취향표: 가로가 더 길고 세로는 더 짧게 나오도록 폭을 넓힌다.
    JS의 CAPTURE_WIDTH.lr 값과 항상 같아야 한다.
    모바일(반응형 100% 폭)에서는 적용하지 않는다. */
 @media (min-width: 769px) {
     #captureAreaLr {
-        width: 1000px;
+        width: 1500px;
     }
 }
 
@@ -75,23 +74,18 @@ body {
 =========================== */
 
 .back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 14px;
-    padding: 8px 16px;
-    border: 1.5px solid #ecd3e0;
-    border-radius: 999px;
+    display: block;
+    text-align: center;
+    margin: 0 0 14px;
     font-size: 13px;
     font-weight: 700;
     color: var(--c-accent);
     text-decoration: none;
-    background: #fff;
-    transition: .2s;
 }
 
 .back-link:hover {
-    background: var(--c-tint);
+    color: var(--c-accent-dark);
+    text-decoration: underline;
 }
 
 .tab-wrap {
@@ -304,11 +298,12 @@ td:hover {
 =========================== */
 
 .lr-grid {
-    /* 왼쪽에서 오른쪽이 아니라 위에서 아래로 순서대로 나열한다. */
+    /* 3열로 배치하되, 왼쪽 위부터 가로가 아니라 세로(위→아래)로 먼저 채운다. */
     display: grid;
-    grid-template-columns: 1fr;
-    grid-auto-flow: row;
-    gap: 34px;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, auto);
+    grid-auto-flow: column;
+    gap: 34px 40px;
 }
 
 .lr-row {

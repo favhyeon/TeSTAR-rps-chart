@@ -155,11 +155,11 @@ const MOBILE_BREAKPOINT = 768;
 
 /* 탭마다 캡처(저장) 기준 폭이 다르다.
    - 텟페스 취향표: 기존과 동일한 1100px
-   - 공수 취향표: 위에서 아래로 나열하는 구성이라 1000px로 좁힘
+   - 공수 취향표: 가로가 더 길고 세로는 더 짧게 나오도록 1500px로 넓힘
    CSS의 #captureArea / #captureAreaLr width 값과 항상 같아야 한다. */
 const CAPTURE_WIDTH = {
     rps: 1100,
-    lr: 1000
+    lr: 1500
 };
 
 function getCaptureWidth(tab) {
@@ -254,6 +254,41 @@ if (selfPairToggle) {
         createTable();
     });
 }
+
+/* ==========================================
+   그룹 전환 (데못죽 / TeSTAR / VTIC)
+   현재 페이지가 어떤 그룹인지는 CURRENT_GROUP만 다르고,
+   나머지 코드는 세 사이트 모두 동일하게 사용한다.
+   데못죽 사이트가 아직 배포 전이라면 아래 주소를 실제 배포 주소로 바꿔주세요.
+========================================== */
+
+const CURRENT_GROUP = "testar";
+
+const GROUP_URLS = {
+    demotjuk: "https://favhyeon.github.io/DEMOTJUK-rps-chart/",
+    testar: "https://favhyeon.github.io/TeSTAR-rps-chart/",
+    vtic: "https://favhyeon.github.io/VTIC-rps-chart/"
+};
+
+const groupRadios = document.querySelectorAll('input[name="groupSelect"]');
+
+groupRadios.forEach(radio => {
+    if (radio.value === CURRENT_GROUP) {
+        radio.checked = true;
+    }
+
+    radio.addEventListener("change", () => {
+        if (!radio.checked) return;
+
+        const target = radio.value;
+        if (target === CURRENT_GROUP) return;
+
+        const url = GROUP_URLS[target];
+        if (url) {
+            window.location.href = url;
+        }
+    });
+});
 
 createTable();
 createLrGrid();
