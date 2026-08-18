@@ -255,6 +255,41 @@ if (selfPairToggle) {
     });
 }
 
+/* ==========================================
+   그룹 전환 (데못죽 / TeSTAR / VTIC)
+   현재 페이지가 어떤 그룹인지는 CURRENT_GROUP만 다르고,
+   나머지 코드는 세 사이트 모두 동일하게 사용한다.
+   데못죽 사이트가 아직 배포 전이라면 아래 주소를 실제 배포 주소로 바꿔주세요.
+========================================== */
+
+const CURRENT_GROUP = "testar";
+
+const GROUP_URLS = {
+    demotjuk: "https://favhyeon.github.io/DEMOTJUK-rps-chart/",
+    testar: "https://favhyeon.github.io/TeSTAR-rps-chart/",
+    vtic: "https://favhyeon.github.io/VTIC-rps-chart/"
+};
+
+const groupRadios = document.querySelectorAll('input[name="groupSelect"]');
+
+groupRadios.forEach(radio => {
+    if (radio.value === CURRENT_GROUP) {
+        radio.checked = true;
+    }
+
+    radio.addEventListener("change", () => {
+        if (!radio.checked) return;
+
+        const target = radio.value;
+        if (target === CURRENT_GROUP) return;
+
+        const url = GROUP_URLS[target];
+        if (url) {
+            window.location.href = url;
+        }
+    });
+});
+
 createTable();
 createLrGrid();
 updateNavButtons();
