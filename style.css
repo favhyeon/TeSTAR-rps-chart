@@ -410,13 +410,17 @@ td:hover {
 
 .lr-text {
     width: 100%;
-    height: 190px;
+    /* --k: 모바일에서 PC 저장 레이아웃 대비 칸 폭 비율(JS가 설정, PC는 1).
+       --fs: 멤버별 글자 크기(저장 이미지 기준 px).
+       k만큼 글자/칸/안쪽 여백을 똑같이 줄이면 줄바꿈이 저장 이미지와 같아진다.
+       (테두리 2px은 고정이라 안쪽 여백에서 보정) */
+    height: calc(190px * var(--k, 1));
     resize: none;
     overflow-y: auto;
     border: 2px solid #ecd3e0;
     border-radius: 10px;
-    padding: 12px 14px 26px;
-    font-size: 17px;
+    padding: calc(14px * var(--k, 1) - 2px) calc(16px * var(--k, 1) - 2px) calc(28px * var(--k, 1) - 2px);
+    font-size: calc(var(--fs, 17) * var(--k, 1) * 1px);
     line-height: 1.5;
     font-family: inherit;
     word-break: break-word;
@@ -459,6 +463,27 @@ td:hover {
 /* 이미지 저장 중에는 글자 크기 조절 바를 숨김 */
 .capturing .lr-font-ctrl {
     display: none;
+}
+
+.lr-warn {
+    display: none;
+    margin-top: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #e0457b;
+}
+
+.lr-row.overflow .lr-warn {
+    display: block;
+}
+
+.lr-row.overflow .lr-text {
+    border-color: #e0457b;
+}
+
+/* 이미지 저장 중에는 경고를 숨김 */
+.capturing .lr-warn {
+    display: none !important;
 }
 
 .lr-char-count {
@@ -996,8 +1021,27 @@ button:hover {
         gap: 26px;
     }
 
+    /* 모바일: 아바타 + L-R 바는 윗줄, 의견 칸/조절 바는 아래에 가로 전체로 배치.
+       칸이 넓어져서 글자가 덜 작게 보인다. (이 블록을 지우면 예전 좌우 배치로 돌아감) */
     .lr-row {
-        gap: 14px;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px 14px;
+    }
+
+    .lr-content {
+        display: contents;
+    }
+
+    .lr-text-wrap,
+    .lr-font-ctrl,
+    .lr-warn {
+        flex: 0 0 100%;
+        min-width: 0;
+    }
+
+    .lr-font-ctrl {
+        margin-top: 0;
     }
 
     .lr-avatar {
@@ -1007,8 +1051,9 @@ button:hover {
     }
 
     .lr-bar-wrap {
+        flex: 1;
+        min-width: 0;
         gap: 8px;
-        margin-bottom: 10px;
     }
 
     .lr-label-l,
@@ -1019,11 +1064,6 @@ button:hover {
     .lr-bar {
         height: 28px;
         border-radius: 8px;
-    }
-
-    .lr-text {
-        height: 150px;
-        padding: 10px 12px 24px;
     }
 
     .lr-char-count {

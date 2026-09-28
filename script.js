@@ -94,6 +94,13 @@ const LR_FONT_MIN = 12;
 const LR_FONT_MAX = 40;
 const LR_FONT_DEFAULT = 17;
 
+/* PC 저장 레이아웃(1500px)에서 의견 입력칸의 실제 가로 폭(px).
+   = ((1500 - 좌우 패딩 100 - 열 간격 80) / 3) - 아바타 112 - 간격 18
+   모바일에서는 이 폭 대비 현재 칸 폭의 비율(k)로 글자/칸 크기를 똑같이 줄여서,
+   화면에서 보이는 줄바꿈·잘림이 저장 이미지와 같아지게 한다.
+   CSS의 PC 레이아웃 값이 바뀌면 이 값도 같이 바꿔야 한다. */
+const LR_PC_TEXT_WIDTH = 310;
+
 /* 행/열 개별 숨기기 상태 (멤버 인덱스 기준, rows/cols 따로 관리) */
 const HIDDEN_KEY = "testar-hidden-members";
 const hiddenSaved = JSON.parse(localStorage.getItem(HIDDEN_KEY)) || { rows: [], cols: [] };
@@ -723,11 +730,12 @@ function createLrGrid() {
             lrData.texts[index] = text.value;
             charCount.textContent = `${text.value.length}/150`;
             saveLrData();
+            updateLrOverflow(row);
         });
 
-        /* 멤버별 글자 크기 */
+        /* 멤버별 글자 크기 (저장 이미지 기준 px, 실제 표시 크기는 CSS에서 --k로 보정) */
         const size = lrData.fontSizes[index] || LR_FONT_DEFAULT;
-        text.style.fontSize = `${size}px`;
+        text.style.setProperty("--fs", size);
 
         const sizeCtrl = document.createElement("div");
         sizeCtrl.className = "lr-font-ctrl";
@@ -742,10 +750,11 @@ function createLrGrid() {
         const valLabel = sizeCtrl.querySelector(".lr-font-val");
         slider.addEventListener("input", () => {
             const v = Number(slider.value);
-            text.style.fontSize = `${v}px`;
+            text.style.setProperty("--fs", v);
             valLabel.textContent = `${v}px`;
             lrData.fontSizes[index] = v;
             saveLrData();
+            updateLrOverflow(row);
         });
 
         textWrap.appendChild(text);
@@ -755,10 +764,48 @@ function createLrGrid() {
         content.appendChild(textWrap);
         content.appendChild(sizeCtrl);
 
+        const warn = document.createElement("div");
+        warn.className = "lr-warn";
+        warn.textContent = "글이 칸을 넘어서 이미지에서 잘려요. 글자 크기나 글을 줄여주세요.";
+        content.appendChild(warn);
+
         row.appendChild(content);
 
         lrGrid.appendChild(row);
     });
+
+    updateLrScale();
+}
+
+/* 이 멤버 칸의 글이 넘치는지(= 저장 이미지에서 잘리는지) 확인해서 경고를 켜고 끈다.
+   탭이 숨겨져 있으면 크기를 잴 수 없으므로 건너뛴다. */
+function updateLrOverflow(row) {
+    const ta = row.querySelector(".lr-text");
+    if (!ta || !ta.clientHeight) return false;
+
+    const over = ta.scrollHeight > ta.clientHeight + 1;
+    row.classList.toggle("overflow", over);
+    return over;
+}
+
+/* 모바일에서는 입력칸이 PC 저장 레이아웃보다 좁으므로,
+   폭 비율(k)만큼 글자/칸 크기를 똑같이 줄여서 줄바꿈이 저장 이미지와 같게 만든다.
+   PC(축소 배율로 보여주는 경우 포함)는 레이아웃 폭이 항상 같아 k = 1. */
+function updateLrScale() {
+    if (!lrGrid || captureAreaLr.classList.contains("hidden")) return;
+
+    const screenWidth = Math.min(window.innerWidth, document.documentElement.clientWidth);
+    let k = 1;
+
+    if (screenWidth <= MOBILE_BREAKPOINT) {
+        const wrap = lrGrid.querySelector(".lr-text-wrap");
+        if (wrap && wrap.clientWidth) {
+            k = wrap.clientWidth / LR_PC_TEXT_WIDTH;
+        }
+    }
+
+    lrGrid.style.setProperty("--k", k.toFixed(4));
+    lrGrid.querySelectorAll(".lr-row").forEach(updateLrOverflow);
 }
 
 function toggleLrCell(memberIndex, cellIndex, cellEl) {
@@ -825,6 +872,19 @@ resetBtn.addEventListener("click", () => {
 ========================================== */
 
 saveBtn.addEventListener("click", async () => {
+    /* 공수 취향표: 글이 넘쳐서 잘리는 멤버가 있으면 저장 전에 알려준다. */
+    if (currentTab === "lr") {
+        updateLrScale();
+        const overflowed = [...lrGrid.querySelectorAll(".lr-row")]
+            .map((r, i) => (r.classList.contains("overflow") ? members[i] : null))
+            .filter(Boolean);
+
+        if (overflowed.length &&
+            !confirm(`${overflowed.join(", ")} 칸의 글이 넘쳐서 이미지에서 일부 잘려요.\n그래도 저장할까요?`)) {
+            return;
+        }
+    }
+
     const buttonWrap = document.querySelector(".button-wrap");
     const tabWrap = document.querySelector(".tab-wrap");
     const area = currentTab === "rps" ? captureAreaRps : captureAreaLr;
@@ -856,13 +916,18 @@ saveBtn.addEventListener("click", async () => {
              * 실제 화면의 textarea(입력 가능 상태)는 건드리지 않는다.
              */
             onclone: (clonedDoc) => {
+                /* 저장 이미지는 항상 PC 레이아웃 기준: 모바일용 보정(k)과 경고 표시는 걷어낸다. */
+                const clonedGrid = clonedDoc.getElementById("lrGrid");
+                if (clonedGrid) clonedGrid.style.setProperty("--k", "1");
+                clonedDoc.querySelectorAll(".lr-row.overflow").forEach((r) => r.classList.remove("overflow"));
+
                 clonedDoc.querySelectorAll(".lr-text").forEach((ta) => {
                     const div = clonedDoc.createElement("div");
                     div.className = "lr-text";
                     div.style.whiteSpace = "pre-wrap";
                     div.style.wordBreak = "break-word";
                     div.style.overflow = "hidden";
-                    div.style.fontSize = ta.style.fontSize;
+                    div.style.setProperty("--fs", ta.style.getPropertyValue("--fs"));
                     div.textContent = ta.value;
                     ta.replaceWith(div);
                 });
@@ -931,6 +996,11 @@ document.addEventListener("keydown", (e) => {
 ========================================== */
 
 function fitCaptureArea() {
+    fitCaptureAreaLayout();
+    updateLrScale();
+}
+
+function fitCaptureAreaLayout() {
     const area = currentTab === "rps" ? captureAreaRps : captureAreaLr;
     const wrap = scaleWrap;
 
