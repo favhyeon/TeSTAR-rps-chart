@@ -410,9 +410,9 @@ td:hover {
 
 .lr-text {
     width: 100%;
-    min-height: 190px;
+    height: 190px;
     resize: none;
-    overflow: hidden;
+    overflow-y: auto;
     border: 2px solid #ecd3e0;
     border-radius: 10px;
     padding: 12px 14px 26px;
@@ -430,6 +430,35 @@ td:hover {
 
 .lr-text::placeholder {
     color: #c7a8bc;
+}
+
+.lr-font-ctrl {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    color: #a7859b;
+    font-weight: 700;
+}
+
+.lr-font-ctrl input[type="range"] {
+    flex: 1;
+    min-width: 0;
+    accent-color: var(--c-accent);
+}
+
+.lr-font-s { font-size: 12px; }
+.lr-font-l { font-size: 18px; }
+
+.lr-font-val {
+    font-size: 12px;
+    min-width: 36px;
+    text-align: right;
+}
+
+/* 이미지 저장 중에는 글자 크기 조절 바를 숨김 */
+.capturing .lr-font-ctrl {
+    display: none;
 }
 
 .lr-char-count {
@@ -993,8 +1022,7 @@ button:hover {
     }
 
     .lr-text {
-        min-height: 120px;
-        font-size: 15px;
+        height: 150px;
         padding: 10px 12px 24px;
     }
 

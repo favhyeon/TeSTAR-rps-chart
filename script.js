@@ -89,6 +89,11 @@ const STORAGE_KEY = "testar-tetpes-rps";
 const LR_STORAGE_KEY = "testar-lr-rps";
 const LR_CELL_COUNT = 12;
 
+/* 멤버별 의견 글자 크기 (px) */
+const LR_FONT_MIN = 12;
+const LR_FONT_MAX = 40;
+const LR_FONT_DEFAULT = 17;
+
 /* 행/열 개별 숨기기 상태 (멤버 인덱스 기준, rows/cols 따로 관리) */
 const HIDDEN_KEY = "testar-hidden-members";
 const hiddenSaved = JSON.parse(localStorage.getItem(HIDDEN_KEY)) || { rows: [], cols: [] };
@@ -180,8 +185,12 @@ let saveData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
 let lrData = JSON.parse(localStorage.getItem(LR_STORAGE_KEY)) || {
     texts: {},
     cells: {},
-    photos: {}
+    photos: {},
+    fontSizes: {}
 };
+
+/* 예전에 저장된 데이터에는 fontSizes가 없으므로 보정 */
+lrData.fontSizes = lrData.fontSizes || {};
 
 const GUIDE_TEXT = {
     rps: [
@@ -714,7 +723,29 @@ function createLrGrid() {
             lrData.texts[index] = text.value;
             charCount.textContent = `${text.value.length}/150`;
             saveLrData();
-            autoResizeTextarea(text);
+        });
+
+        /* 멤버별 글자 크기 */
+        const size = lrData.fontSizes[index] || LR_FONT_DEFAULT;
+        text.style.fontSize = `${size}px`;
+
+        const sizeCtrl = document.createElement("div");
+        sizeCtrl.className = "lr-font-ctrl";
+        sizeCtrl.innerHTML = `
+            <span class="lr-font-s">가</span>
+            <input type="range" min="${LR_FONT_MIN}" max="${LR_FONT_MAX}" value="${size}" aria-label="${member} 글자 크기">
+            <span class="lr-font-l">가</span>
+            <span class="lr-font-val">${size}px</span>
+        `;
+
+        const slider = sizeCtrl.querySelector("input");
+        const valLabel = sizeCtrl.querySelector(".lr-font-val");
+        slider.addEventListener("input", () => {
+            const v = Number(slider.value);
+            text.style.fontSize = `${v}px`;
+            valLabel.textContent = `${v}px`;
+            lrData.fontSizes[index] = v;
+            saveLrData();
         });
 
         textWrap.appendChild(text);
@@ -722,22 +753,12 @@ function createLrGrid() {
 
         content.appendChild(barWrap);
         content.appendChild(textWrap);
+        content.appendChild(sizeCtrl);
 
         row.appendChild(content);
 
         lrGrid.appendChild(row);
     });
-
-    /* 저장돼 있던 글이 여러 줄이어도 처음부터 잘리지 않도록,
-       모든 칸을 한 번씩 실제 내용 높이에 맞춰준다. */
-    lrGrid.querySelectorAll(".lr-text").forEach(autoResizeTextarea);
-}
-
-/* 칸에 적은 글이 늘어나면 잘리는 대신 칸 자체가 자연스럽게 늘어나도록.
-   grid 행이 auto 높이라 아래 칸들과 겹치지 않고 밀려 내려간다. */
-function autoResizeTextarea(el) {
-    el.style.height = "auto";
-    el.style.height = `${el.scrollHeight}px`;
 }
 
 function toggleLrCell(memberIndex, cellIndex, cellEl) {
@@ -794,7 +815,7 @@ resetBtn.addEventListener("click", () => {
         createTable();
     } else {
         localStorage.removeItem(LR_STORAGE_KEY);
-        lrData = { texts: {}, cells: {}, photos: {} };
+        lrData = { texts: {}, cells: {}, photos: {}, fontSizes: {} };
         createLrGrid();
     }
 });
@@ -841,6 +862,7 @@ saveBtn.addEventListener("click", async () => {
                     div.style.whiteSpace = "pre-wrap";
                     div.style.wordBreak = "break-word";
                     div.style.overflow = "hidden";
+                    div.style.fontSize = ta.style.fontSize;
                     div.textContent = ta.value;
                     ta.replaceWith(div);
                 });
