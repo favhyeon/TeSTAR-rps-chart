@@ -1018,55 +1018,52 @@ button:hover {
         grid-template-columns: 1fr;
         grid-template-rows: none;
         grid-auto-flow: row;
-        gap: 26px;
+        gap: 22px;
     }
 
-    /* 모바일: 아바타 + L-R 바는 윗줄, 의견 칸/조절 바는 아래에 가로 전체로 배치.
-       칸이 넓어져서 글자가 덜 작게 보인다. (이 블록을 지우면 예전 좌우 배치로 돌아감) */
+    /* 원래대로 아바타 | (막대+의견칸) 좌우 배치를 유지하고,
+       막대와 의견칸은 같은 오른쪽 칸(.lr-content) 안에서 똑같은 폭을 그대로 쓰므로
+       둘의 가로 길이는 항상 같다. 전체 크기만 더 줄인다. */
     .lr-row {
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 8px 14px;
-    }
-
-    .lr-content {
-        display: contents;
-    }
-
-    .lr-text-wrap,
-    .lr-font-ctrl,
-    .lr-warn {
-        flex: 0 0 100%;
-        min-width: 0;
-    }
-
-    .lr-font-ctrl {
-        margin-top: 0;
+        gap: 10px;
     }
 
     .lr-avatar {
-        width: 110px;
-        height: 110px;
+        width: 76px;
+        height: 76px;
         border-width: 3px;
     }
 
     .lr-bar-wrap {
-        flex: 1;
-        min-width: 0;
-        gap: 8px;
+        gap: 6px;
+        margin-bottom: 8px;
     }
 
     .lr-label-l,
     .lr-label-r {
-        font-size: 15px;
+        font-size: 13px;
     }
 
     .lr-bar {
-        height: 28px;
-        border-radius: 8px;
+        height: 24px;
+        border-radius: 6px;
+    }
+
+    .lr-font-ctrl {
+        margin-top: 6px;
+        gap: 6px;
     }
 
     .lr-char-count {
         font-size: 11px;
+    }
+
+    #captureAreaLr h1 {
+        font-size: 21px;
+        margin-bottom: 12px;
+    }
+
+    #captureAreaLr .logo {
+        width: 100px;
     }
 }
