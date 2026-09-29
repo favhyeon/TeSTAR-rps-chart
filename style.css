@@ -1029,9 +1029,17 @@ button:hover {
     }
 
     .lr-avatar {
-        width: 76px;
-        height: 76px;
-        border-width: 3px;
+        width: 100px;
+        height: 100px;
+        border-width: 4px;
+    }
+
+    /* 저장 이미지(190px)보다 조금만 낮게(165px) — 화면에서 살짝 더 컴팩트해 보이도록.
+       칸이 저장 이미지보다 낮아진 만큼, 잘림 경고가 실제보다 조금 일찍(더 보수적으로) 뜰 수 있다.
+       즉 경고가 떠도 저장했을 때는 안 잘리는 경우는 있어도, 경고 없이 저장 후 잘리는 일은 없다. */
+    .lr-text {
+        height: calc(165px * var(--k, 1));
+        padding: calc(12px * var(--k, 1) - 2px) calc(14px * var(--k, 1) - 2px) calc(24px * var(--k, 1) - 2px);
     }
 
     .lr-bar-wrap {
